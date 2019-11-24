@@ -83,6 +83,7 @@ assert DATA_PATH.exists(), DATA_PATH
 DATA_FEATHER_PATH ='~/ashrae/data/feather'
 DATA_FEATHER_PATH = Path(DATA_FEATHER_PATH)
 DATA_FEATHER_PATH = DATA_FEATHER_PATH.expanduser()
+DATA_FEATHER_PATH.mkdir(exist_ok=True)
 assert DATA_FEATHER_PATH.exists()
 
 # zipfile.ZipFile(DATA_PATH).infolist()
