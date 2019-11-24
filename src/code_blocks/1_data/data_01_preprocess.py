@@ -1,29 +1,34 @@
-# %%
-def preprocess_date_time_cols(df):
-    df['date'] = df['timestamp'].dt.date
-    logging.info("Added date column".format())
-    df["hour"] = df["timestamp"].dt.hour
-    logging.info("Added hour column".format())
-    # df["day"] = df["timestamp"].dt.day
-    df["weekend"] = df["timestamp"].dt.weekday
-    logging.info("Added weekend column".format())
-    df["month"] = df["timestamp"].dt.month
-    logging.info("Added month column".format())
-    df["dayofweek"] = df["timestamp"].dt.dayofweek
-    logging.info("Added dayofweek column".format())
-
-    return df
+#%%
 
 
-# %% Add dates and times
-logging.info("Adding basic time features to train and test".format())
-train_df = preprocess_date_time_cols(train_df)
-test_df = preprocess_date_time_cols(test_df)
+#%%
+if 0:
+    # %%
+    def preprocess_date_time_cols(df):
+        df['date'] = df['timestamp'].dt.date
+        logging.info("Added date column".format())
+        df["hour"] = df["timestamp"].dt.hour
+        logging.info("Added hour column".format())
+        # df["day"] = df["timestamp"].dt.day
+        df["weekend"] = df["timestamp"].dt.weekday
+        logging.info("Added weekend column".format())
+        df["month"] = df["timestamp"].dt.month
+        logging.info("Added month column".format())
+        df["dayofweek"] = df["timestamp"].dt.dayofweek
+        logging.info("Added dayofweek column".format())
 
-#%% Take the ln transform of the targets
-train_df['meter_reading_log1p'] = np.log1p(train_df['meter_reading'])
-test_df['meter_reading_log1p'] = np.log1p(test_df['meter_reading'])
-logging.info("Added meter_reading_log1p [ln(1+x)] column".format())
+        return df
+
+
+    # %% Add dates and times
+    logging.info("Adding basic time features to train and test".format())
+    train_df = preprocess_date_time_cols(train_df)
+    test_df = preprocess_date_time_cols(test_df)
+
+    #%% Take the ln transform of the targets
+    train_df['meter_reading_log1p'] = np.log1p(train_df['meter_reading'])
+    test_df['meter_reading_log1p'] = np.log1p(test_df['meter_reading'])
+    logging.info("Added meter_reading_log1p [ln(1+x)] column".format())
 
 #%%
 if 0:
