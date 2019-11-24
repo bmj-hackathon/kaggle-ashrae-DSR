@@ -1,7 +1,19 @@
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 import sklearn as sk
+import time
+import logging
 
+
+#%%
+def dump_func_name(func):
+    def echo_func(*func_args, **func_kwargs):
+        print('')
+        print('Start func: {}'.format(func.__name__))
+        return func(*func_args, **func_kwargs)
+    return echo_func
+
+#%%
 def timeit(method):
     """ Decorator to time execution of transformers
     :param method:
@@ -15,7 +27,7 @@ def timeit(method):
             name = kw.get('log_name', method.__name__.upper())
             kw['log_time'][name] = int((te - ts) * 1000)
         else:
-            print("\t {} {:2.1f}s".format(method.__name__, (te - ts)))
+            logging.info("\t {} method took {:2.1f}s".format(method.__name__, (te - ts)))
         return result
 
     return timed
@@ -26,7 +38,7 @@ class TransformerLog():
     """
     @property
     def log(self):
-        return "Transformer: {}".format(type(self).__name__)
+        return "{} transform".format(type(self).__name__)
 
 #%%
 class MultipleToNewFeature(sk.base.BaseEstimator, sk.base.TransformerMixin, TransformerLog):
@@ -48,26 +60,29 @@ class MultipleToNewFeature(sk.base.BaseEstimator, sk.base.TransformerMixin, Tran
         return df
 
 #%%
-class TypeSelector(BaseEstimator, TransformerMixin):
+class TypeSelector(BaseEstimator, TransformerMixin, TransformerLog):
     def __init__(self, dtype):
         self.dtype = dtype
 
     def fit(self, X, y=None):
         return self
 
+    @timeit
     def transform(self, X):
         assert isinstance(X, pd.DataFrame)
         return X.select_dtypes(include=[self.dtype])
 
 
-class FeatureSelector(BaseEstimator, TransformerMixin):
+class FeatureSelector(BaseEstimator, TransformerMixin, TransformerLog):
     def __init__(self, feature_names):
         self._feature_names = feature_names
 
     def fit(self, X, y=None):
         return self
 
+    @timeit
     def transform(self, X, y=None):
+        logging.info("{} - {}".format(self.log, self._feature_names))
         assert isinstance(X, pd.DataFrame)
 
         try:
@@ -77,13 +92,14 @@ class FeatureSelector(BaseEstimator, TransformerMixin):
             raise KeyError("The DataFrame does not include the columns: %s" % cols_error)
 
 
-class TemporalTransformer(BaseEstimator, TransformerMixin):
+class TemporalTransformer(BaseEstimator, TransformerMixin, TransformerLog):
     def __init__(self, column):
         self._column = column
 
     def fit(self, X, y=None):
         return self
 
+    @timeit
     def transform(self, X, y=None):
         assert pd.api.types.is_datetime64_any_dtype(X[self._column])
 
