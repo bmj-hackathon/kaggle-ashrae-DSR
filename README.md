@@ -1,6 +1,14 @@
 # kaggle-ashrae-DSR
 
-## Linking the DATA folder
+## DATA organization
+
+Your local data folder should have
+```
+./raw
+./feather
+```
+
+### Linking the DATA folder
 
 `ln -s YOUR_DATA_PATH ./data`
 i.e.;
