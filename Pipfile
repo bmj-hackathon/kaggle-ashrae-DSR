@@ -6,6 +6,26 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+sklearn = "*"
+pandas = "*"
+jupytext = "*"
+seaborn = "*"
+tqdm = "*"
+plotly = "*"
+ipython = "*"
+sklearn-pandas = "*"
+pandas-profiling = "*"
+ipykernel = "*"
+keras = "*"
+pyyaml = "*"
+dash = "*"
+lightgbm = "*"
+xgboost = "*"
+catboost = "*"
+pyarrow = "*"
+dash-daq = "*"
+psypy = "*"
+psychrolib = "*"
 
 [requires]
 python_version = "3.6"
