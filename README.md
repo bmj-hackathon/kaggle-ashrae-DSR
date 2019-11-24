@@ -13,3 +13,12 @@ Your local data folder should have
 `ln -s YOUR_DATA_PATH ./data`
 i.e.;
 `ln -s ~/DATA/ashrae-energy-prediction/data ./data`
+
+## Environment management
+
+### Jupyter Kernel
+1. Activate the env
+1. Ensure ipykernel is pip-installed
+1. Install the kernel to jupyter
+
+ipython kernel install --user --name=kaggle_ashrae_dsr
