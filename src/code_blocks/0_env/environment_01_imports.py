@@ -27,6 +27,7 @@ import random
 # =============================================================================
 import tqdm
 
+
 #%% ===========================================================================
 # ML imports
 # =============================================================================
@@ -69,15 +70,15 @@ import seaborn as sns
 print('seaboarn {} as sns'.format(sns.__version__))
 
 # from IPython.core.display import display, HTML
-
-# --- plotly ---
-import plotly.io as pio
-pio.renderers.default = "browser"
-# from plotly import tools, subplots
-import plotly.offline as py
-# py.init_notebook_mode(connected=True)
-import plotly.graph_objs as go
-import plotly.express as px
-import plotly.figure_factory as ff
+#
+# # --- plotly ---
+# import plotly.io as pio
+# pio.renderers.default = "browser"
+# # from plotly import tools, subplots
+# import plotly.offline as py
+# # py.init_notebook_mode(connected=True)
+# import plotly.graph_objs as go
+# import plotly.express as px
+# import plotly.figure_factory as ff
 
 
