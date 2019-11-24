@@ -65,6 +65,33 @@ def reduce_mem_usage(df, use_float16=False):
 
     return df
 
+def import_data(file):
+    """create a dataframe and optimize its memory usage"""
+    df = pd.read_csv(file, parse_dates=True, keep_date_col=True)
+    df = reduce_mem_usage(df)
+    return df
+#%%
+
+# %%
+from pathlib import Path
+import zipfile
+DATA_PATH = '~/ashrae/data/raw'
+DATA_PATH = Path(DATA_PATH)
+DATA_PATH = DATA_PATH.expanduser()
+assert DATA_PATH.exists(), DATA_PATH
+
+DATA_FEATHER_PATH ='~/ashrae/data/feather'
+DATA_FEATHER_PATH = Path(DATA_FEATHER_PATH)
+DATA_FEATHER_PATH = DATA_FEATHER_PATH.expanduser()
+DATA_FEATHER_PATH.mkdir(exist_ok=True)
+assert DATA_FEATHER_PATH.exists()
+
+# zipfile.ZipFile(DATA_PATH).infolist()
+
+#%%
+ZIPPED = False
+
+# %%time
 if ZIPPED:
     with zipfile.ZipFile(DATA_PATH) as zf:
         with zf.open('train.csv') as zcsv:
@@ -80,12 +107,12 @@ if ZIPPED:
         with zf.open('sample_submission.csv') as zcsv:
             sample_submission = pd.read_csv(zcsv)
 else:
-    train_df = pd.read_csv(DATA_PATH / 'train.csv.zip')
-    test_df = pd.read_csv(DATA_PATH / 'test.csv.zip')
-    weather_train_df = pd.read_csv(DATA_PATH / 'weather_train.csv.zip')
-    weather_test_df = pd.read_csv(DATA_PATH / 'weather_test.csv.zip')
-    building_meta_df = pd.read_csv(DATA_PATH / 'building_metadata.csv.zip')
-    sample_submission = pd.read_csv(DATA_PATH / 'sample_submission.csv.zip')
+    train_df = pd.read_csv(DATA_PATH / 'train.csv')
+    test_df = pd.read_csv(DATA_PATH / 'test.csv')
+    weather_train_df = pd.read_csv(DATA_PATH / 'weather_train.csv')
+    weather_test_df = pd.read_csv(DATA_PATH / 'weather_test.csv')
+    building_meta_df = pd.read_csv(DATA_PATH / 'building_metadata.csv')
+    sample_submission = pd.read_csv(DATA_PATH / 'sample_submission.csv')
 
 
 train_df['timestamp'] = pd.to_datetime(train_df['timestamp'])
