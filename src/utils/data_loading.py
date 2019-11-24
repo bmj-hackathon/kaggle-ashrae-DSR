@@ -1,27 +1,28 @@
-## FROM KAGGLE KERNEL:
-import os
-import random
+## Memory Optimization
+# https://www.kaggle.com/rohanrao/ashrae-divide-and-conquer @vopani
+# Original code from https://www.kaggle.com/gemartin/load-data-reduce-memory-usage by @gemartin
+
 import gc
+import numpy as np
+import pandas as pd
 
-import tqdm
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
-
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-#
-# from sklearn import preprocessing
-# from sklearn.model_selection import KFold
-# import lightgbm as lgb
-# import xgboost as xgb
-# import catboost as cb
-
-# %% {"_kg_hide-input": true}
-# Copy from https://www.kaggle.com/gemartin/load-data-reduce-memory-usage by @gemartin
-# Modified to support timestamp type
-# Modified to add option to use float16 or not. feather format does not support float16.
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
+from pathlib import Path
+import zipfile
 
+DATA_PATH = 'data/raw'
+DATA_PATH = Path(DATA_PATH)
+DATA_PATH = DATA_PATH.expanduser()
+assert DATA_PATH.exists(), DATA_PATH
+
+DATA_FEATHER_PATH ='data/feather'
+DATA_FEATHER_PATH = Path(DATA_FEATHER_PATH)
+DATA_FEATHER_PATH = DATA_FEATHER_PATH.expanduser()
+DATA_FEATHER_PATH.mkdir(parents=True, exist_ok=True)
+
+
+ZIPPED = False
+MERGE = True
 
 def reduce_mem_usage(df, use_float16=False):
     """ iterate through all the columns of a dataframe and modify the data type
@@ -64,33 +65,6 @@ def reduce_mem_usage(df, use_float16=False):
 
     return df
 
-
-def import_data(file):
-    """create a dataframe and optimize its memory usage"""
-    df = pd.read_csv(file, parse_dates=True, keep_date_col=True)
-    df = reduce_mem_usage(df)
-    return df
-#%%
-
-# %%
-from pathlib import Path
-import zipfile
-DATA_PATH = '~/ashrae/data/raw'
-DATA_PATH = Path(DATA_PATH)
-DATA_PATH = DATA_PATH.expanduser()
-assert DATA_PATH.exists(), DATA_PATH
-
-DATA_FEATHER_PATH ='~/ashrae/data/feather'
-DATA_FEATHER_PATH = Path(DATA_FEATHER_PATH)
-DATA_FEATHER_PATH = DATA_FEATHER_PATH.expanduser()
-assert DATA_FEATHER_PATH.exists()
-
-# zipfile.ZipFile(DATA_PATH).infolist()
-
-#%%
-ZIPPED = False
-
-# %%time
 if ZIPPED:
     with zipfile.ZipFile(DATA_PATH) as zf:
         with zf.open('train.csv') as zcsv:
@@ -105,81 +79,42 @@ if ZIPPED:
             building_meta_df = pd.read_csv(zcsv)
         with zf.open('sample_submission.csv') as zcsv:
             sample_submission = pd.read_csv(zcsv)
-#%%
-train_df = pd.read_csv(DATA_PATH / 'train.zip')
-test_df = pd.read_csv(DATA_PATH / 'test.zip')
-weather_train_df = pd.read_csv(DATA_PATH / 'weather_train.zip')
-weather_test_df = pd.read_csv(DATA_PATH / 'weather_test.zip')
-building_meta_df = pd.read_csv(DATA_PATH / 'building_metadata.zip')
-sample_submission = pd.read_csv(DATA_PATH / 'sample_submission.zip')
+else:
+    train_df = pd.read_csv(DATA_PATH / 'train.csv.zip')
+    test_df = pd.read_csv(DATA_PATH / 'test.csv.zip')
+    weather_train_df = pd.read_csv(DATA_PATH / 'weather_train.csv.zip')
+    weather_test_df = pd.read_csv(DATA_PATH / 'weather_test.csv.zip')
+    building_meta_df = pd.read_csv(DATA_PATH / 'building_metadata.csv.zip')
+    sample_submission = pd.read_csv(DATA_PATH / 'sample_submission.csv.zip')
 
 
-# %%
-# # %%time
-
-# # Read data...
-# root = '../input/ashrae-energy-prediction'
-
-# train_df = pd.read_csv(os.path.join(root, 'train.csv'))
-# weather_train_df = pd.read_csv(os.path.join(root, 'weather_train.csv'))
-# test_df = pd.read_csv(os.path.join(root, 'test.csv'))
-# weather_test_df = pd.read_csv(os.path.join(root, 'weather_test.csv'))
-# building_meta_df = pd.read_csv(os.path.join(root, 'building_metadata.csv'))
-# sample_submission = pd.read_csv(os.path.join(root, 'sample_submission.csv'))
-
-# %%
 train_df['timestamp'] = pd.to_datetime(train_df['timestamp'])
 test_df['timestamp'] = pd.to_datetime(test_df['timestamp'])
 weather_train_df['timestamp'] = pd.to_datetime(weather_train_df['timestamp'])
 weather_test_df['timestamp'] = pd.to_datetime(weather_test_df['timestamp'])
 
-# %% {"_kg_hide-input": true, "_kg_hide-output": true}
-# # categorize primary_use column to reduce memory on merge...
+gc.collect()
 
-# primary_use_dict = {key: value for value, key in enumerate(primary_use_list)}
-# print('primary_use_dict: ', primary_use_dict)
-# building_meta_df['primary_use'] = building_meta_df['primary_use'].map(primary_use_dict)
 
-# gc.collect()
-
-# %% {"_kg_hide-input": true, "_kg_hide-output": true}
 reduce_mem_usage(train_df)
 reduce_mem_usage(test_df)
 reduce_mem_usage(building_meta_df)
 reduce_mem_usage(weather_train_df)
 reduce_mem_usage(weather_test_df)
 
-# %% [markdown]
-# # Save data in feather format
+train_df.to_feather(DATA_FEATHER_PATH /'train.feather')
+test_df.to_feather(DATA_FEATHER_PATH / 'test.feather')
+weather_train_df.to_feather(DATA_FEATHER_PATH /'weather_train.feather')
+weather_test_df.to_feather(DATA_FEATHER_PATH /'weather_test.feather')
+building_meta_df.to_feather(DATA_FEATHER_PATH /'building_metadata.feather')
+sample_submission.to_feather(DATA_FEATHER_PATH /'sample_submission.feather')
 
-# %%
-# %%time
+if MERGE:
+    train_merged = train_df.merge(building_meta_df, how='left', on='building_id')
+    test_merged = test_df.merge(building_meta_df, how='left', on='building_id')
 
-train_df.to_feather('train.feather')
-test_df.to_feather('test.feather')
-weather_train_df.to_feather('weather_train.feather')
-weather_test_df.to_feather('weather_test.feather')
-building_meta_df.to_feather('building_metadata.feather')
-sample_submission.to_feather('sample_submission.feather')
+    train_merged = train_merged.merge(weather_train_df, how='left', on=['site_id', 'timestamp'])
+    test_merged = test_merged.merge(weather_test_df, how='left', on=['site_id', 'timestamp'])
 
-# %% [markdown]
-# # Read data in feather format
-#
-# You can see "+ Add data" button on top-right of notebook, press this button and add output of this kernel, then you can use above saved feather data frame for fast loading!
-#
-# Let's see how fast it is.
-
-# %%
-# %%time
-
-train_df = pd.read_feather('train.feather')
-weather_train_df = pd.read_feather('weather_train.feather')
-test_df = pd.read_feather('test.feather')
-weather_test_df = pd.read_feather('weather_test.feather')
-building_meta_df = pd.read_feather('building_metadata.feather')
-sample_submission = pd.read_feather('sample_submission.feather')
-
-# %% [markdown]
-# Reduced 37.1 sec to 1.51 sec!! 😄😄😄
-
-# %%
+    train_merged.to_feather(DATA_FEATHER_PATH /'train_merged.feather')
+    test_merged.to_feather(DATA_FEATHER_PATH /'test_merged.feather')
