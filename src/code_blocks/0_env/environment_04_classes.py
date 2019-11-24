@@ -104,7 +104,7 @@ def reduce_mem_usage(df, use_float16=False):
 class Map(dict):
     """
     Example:
-    m = Map({'first_name': 'Eduardo'}, last_name='Pool', age=24, sports=['Soccer'])
+    mj = Map({'first_name': 'Eduardo'}, last_name='Pool', age=24, sports=['Soccer'])
     """
     def __init__(self, *args, **kwargs):
         super(Map, self).__init__(*args, **kwargs)

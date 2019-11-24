@@ -4,7 +4,7 @@
 """
 Created on Sun Jun 10 10:32:09 2018
 
-@author: m.jones
+@author: mj.jones
 """
 
 #%%
@@ -35,7 +35,7 @@ logger.setLevel(logging.INFO)
 
 # Create formatter
 FORMAT = "%(asctime)s : %(message)s"
-DATE_FMT = "%Y-%m-%d %H:%M:%S"
+DATE_FMT = "%Y-%mj-%d %H:%M:%S"
 formatter = logging.Formatter(FORMAT, DATE_FMT)
 
 # Create handler and assign
