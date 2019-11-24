@@ -26,6 +26,7 @@ pyarrow = "*"
 dash-daq = "*"
 psypy = "*"
 psychrolib = "*"
+category-encoders = "*"
 
 [requires]
 python_version = "3.6"

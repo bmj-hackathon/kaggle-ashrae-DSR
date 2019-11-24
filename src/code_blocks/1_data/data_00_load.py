@@ -16,7 +16,6 @@ logging.info("Loaded: weather_train_df {}".format(weather_train_df.shape))
 # Weather test
 weather_test_df = pd.read_feather(SETTINGS.data.path_data_root/'weather_test.feather')
 logging.info("Loaded: weather_test_df {}".format(weather_test_df.shape))
-weather_test_df = reduce_mem_usage(weather_test_df)
 
 # Meta
 building_meta_df = pd.read_feather(SETTINGS.data.path_data_root/'building_metadata.feather')
@@ -24,9 +23,9 @@ logging.info("Loaded: building_meta_df {}".format(building_meta_df.shape))
 building_meta_df.set_index('building_id', inplace=True, drop=True)
 
 # Sample
-sample_submission = pd.read_feather(os.path.join(SETTINGS.data.path_data_root, 'sample_submission.feather'))
-logging.info("Loaded: sample_submission {}".format(sample_submission.shape))
-sample_submission = reduce_mem_usage(sample_submission)
+# sample_submission = pd.read_feather(os.path.join(SETTINGS.data.path_data_root, 'sample_submission.feather'))
+# logging.info("Loaded: sample_submission {}".format(sample_submission.shape))
+# sample_submission = reduce_mem_usage(sample_submission)
 
 #%%
 # train_merge = train_df_data.merge(building_meta_df, on='building_id', how='left')
