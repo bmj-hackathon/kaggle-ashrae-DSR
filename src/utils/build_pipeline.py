@@ -11,11 +11,11 @@ temporal_features = ['timestamp']
 
 
 # Build pipelines
-categorical_pipeline1 = Pipeline(steps=[('cat_selector', FeatureSelector(categorical_features1)),
-                                        ('label_encoder', ce.one_hot.OneHotEncoder(handle_unknown='value'))])
+categorical_pipeline1 = Pipeline(steps=[('cat_selector1', FeatureSelector(categorical_features1)),
+                                        ('onehot_encoder', ce.one_hot.OneHotEncoder(handle_unknown='value'))])
 
-categorical_pipeline2 = Pipeline(steps=[('cat_selector', FeatureSelector(categorical_features2)),
-                                        ('label_encoder', ce.ordinal.OrdinalEncoder(handle_unknown='value'))])
+categorical_pipeline2 = Pipeline(steps=[('cat_selector2', FeatureSelector(categorical_features2)),
+                                        ('ordinal_encoder', ce.ordinal.OrdinalEncoder(handle_unknown='value'))])
 
 numerical_pipeline = Pipeline(steps=[('num_selector', FeatureSelector(numerical_features)),
                                      ('imputer', SimpleImputer(strategy='median')),

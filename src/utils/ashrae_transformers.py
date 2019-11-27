@@ -6,7 +6,7 @@ import logging
 
 __all__ = ['TypeSelector', 'FeatureSelector', 'TemporalTransformer']
 
-#%%
+
 def dump_func_name(func):
     def echo_func(*func_args, **func_kwargs):
         print('')
@@ -14,7 +14,6 @@ def dump_func_name(func):
         return func(*func_args, **func_kwargs)
     return echo_func
 
-#%%
 def timeit(method):
     """Decorator to time execution of transformers
     :param method:
@@ -34,7 +33,6 @@ def timeit(method):
     return timed
 
 
-#%%
 class UtilityMixin:
     @property
     def log(self):
@@ -58,7 +56,6 @@ class UtilityMixin:
             raise ValueError("Input is not a pandas DataFrame it's a {}".format(type(df)))
 
 
-#%%
 class TransformerLog():
     """Add a .log attribute for logging
     """
@@ -66,15 +63,9 @@ class TransformerLog():
     def log(self):
         return "{} transform".format(type(self).__name__)
 
-#%%
-<<<<<<< HEAD
-class MultipleToNewFeature(BaseEstimator, TransformerMixin, TransformerLog):
-    """Given a list of column names, create a new column in the df. New column defined by func.
-    """
 
-=======
 class MultipleToNewFeature(sk.base.BaseEstimator, sk.base.TransformerMixin, UtilityMixin):
->>>>>>> 0e945cd5a05b97896c7b3ad1355b60535f583548
+
     def __init__(self, selected_cols, new_col_name, func):
         """Given a list of column names, create one new column in the df. New column defined by func.
 
@@ -98,7 +89,7 @@ class MultipleToNewFeature(sk.base.BaseEstimator, sk.base.TransformerMixin, Util
         logging.info(self.log, "{}({}) -> ['{}']".format(self.func.__name__, self.columns, self.new_col_name))
         return df
 
-#%%
+
 class TypeSelector(BaseEstimator, TransformerMixin, TransformerLog):
     def __init__(self, dtype):
         self.dtype = dtype
