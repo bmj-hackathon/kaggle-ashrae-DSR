@@ -2,8 +2,9 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import FeatureUnion, Pipeline
 from sklearn.preprocessing import QuantileTransformer, KBinsDiscretizer, OneHotEncoder, StandardScaler
 import category_encoders as ce
+from src.utils.ashrae_transformers import *
 
-categorical_features1 = ['site_id', 'meter', 'primary_use']
+categorical_features1 = ['meter', 'primary_use']
 categorical_features2 = ['building_id']
 numerical_features = ['square_feet', 'air_temperature', 'dew_temperature', 'wind_speed']
 temporal_features = ['timestamp']
@@ -11,10 +12,10 @@ temporal_features = ['timestamp']
 
 # Build pipelines
 categorical_pipeline1 = Pipeline(steps=[('cat_selector', FeatureSelector(categorical_features1)),
-                                       ('label_encoder', ce.one_hot.OneHotEncoder(handle_unknown='value'))])
+                                        ('label_encoder', ce.one_hot.OneHotEncoder(handle_unknown='value'))])
 
 categorical_pipeline2 = Pipeline(steps=[('cat_selector', FeatureSelector(categorical_features2)),
-                                       ('label_encoder', ce.ordinal.OrdinalEncoder(handle_unknown='value'))])
+                                        ('label_encoder', ce.ordinal.OrdinalEncoder(handle_unknown='value'))])
 
 numerical_pipeline = Pipeline(steps=[('num_selector', FeatureSelector(numerical_features)),
                                      ('imputer', SimpleImputer(strategy='median')),
@@ -30,6 +31,6 @@ full_pipeline = FeatureUnion(transformer_list=[('categorical_pipeline1', categor
                                                ('numerical_pipeline', numerical_pipeline),
                                                ('temporal_pipeline', temporal_pipeline)],
                              n_jobs=-1,
-                             verbose=True)
+                             verbose=False)
 
 

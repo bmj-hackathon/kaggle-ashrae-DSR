@@ -1,9 +1,10 @@
 import pandas as pd
+import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
-import sklearn as sk
 import time
 import logging
 
+__all__ = ['TypeSelector', 'FeatureSelector', 'TemporalTransformer']
 
 #%%
 def dump_func_name(func):
@@ -41,7 +42,7 @@ class TransformerLog():
         return "{} transform".format(type(self).__name__)
 
 #%%
-class MultipleToNewFeature(sk.base.BaseEstimator, sk.base.TransformerMixin, TransformerLog):
+class MultipleToNewFeature(BaseEstimator, TransformerMixin, TransformerLog):
     """Given a list of column names, create a new column in the df. New column defined by func.
     """
 
