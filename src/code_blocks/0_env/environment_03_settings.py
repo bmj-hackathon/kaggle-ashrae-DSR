@@ -7,6 +7,7 @@ SETTINGS.model = Map()
 SETTINGS.data.path_data_root = Path.cwd() / 'data' / 'feather'
 SETTINGS.data.path_output = Path.cwd() / 'output'
 assert SETTINGS.data.path_data_root.exists()
+SETTINGS.data.drop = 0.9 # Amount of data to drop during dev
 
 # MODEL
 SETTINGS.model.folds = 5

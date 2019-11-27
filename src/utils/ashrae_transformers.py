@@ -16,7 +16,7 @@ def dump_func_name(func):
 
 #%%
 def timeit(method):
-    """ Decorator to time execution of transformers
+    """Decorator to time execution of transformers
     :param method:
     :return:
     """
@@ -33,6 +33,31 @@ def timeit(method):
 
     return timed
 
+
+#%%
+class UtilityMixin:
+    @property
+    def log(self):
+        return "Transformer: {}".format(type(self).__name__)
+
+    def _check_columns_exist(self, df):
+        self._assert_df(df)
+        # Ensure columns in a list()
+        if isinstance(self.columns, str):
+            self.columns = list(self.columns)
+
+        self._assert_df(df)
+        missing_columns = set(self.columns) - set(df.columns)
+        if len(missing_columns) > 0:
+            missing_columns_ = ','.join(col for col in missing_columns)
+            raise KeyError(
+                "Keys are missing in the record: {}, columns required:{}".format(missing_columns_, self.columns))
+
+    def _assert_df(self, df):
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError("Input is not a pandas DataFrame it's a {}".format(type(df)))
+
+
 #%%
 class TransformerLog():
     """Add a .log attribute for logging
@@ -42,22 +67,35 @@ class TransformerLog():
         return "{} transform".format(type(self).__name__)
 
 #%%
+<<<<<<< HEAD
 class MultipleToNewFeature(BaseEstimator, TransformerMixin, TransformerLog):
     """Given a list of column names, create a new column in the df. New column defined by func.
     """
 
+=======
+class MultipleToNewFeature(sk.base.BaseEstimator, sk.base.TransformerMixin, UtilityMixin):
+>>>>>>> 0e945cd5a05b97896c7b3ad1355b60535f583548
     def __init__(self, selected_cols, new_col_name, func):
-        self.selected_cols = selected_cols
+        """Given a list of column names, create one new column in the df. New column defined by func.
+
+        :param selected_cols: The list of columns to pass into func
+        :param new_col_name: The newly created column name
+        :param func: The function to be applied to each row
+        """
+        self.columns = selected_cols
         self.new_col_name = new_col_name
         self.func = func
+
 
     def fit(self, X, y=None):
         return self
 
     @timeit
     def transform(self, df, y=None):
+        self._assert_df(df)
+        self._check_columns_exist(df)
         df[self.new_col_name] = df.apply(self.func, axis=1)
-        print(self.log, "{}({}) -> ['{}']".format(self.func.__name__, self.selected_cols, self.new_col_name))
+        logging.info(self.log, "{}({}) -> ['{}']".format(self.func.__name__, self.columns, self.new_col_name))
         return df
 
 #%%
