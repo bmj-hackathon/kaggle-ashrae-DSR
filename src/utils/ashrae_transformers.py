@@ -64,7 +64,7 @@ class TransformerLog():
         return "{} transform".format(type(self).__name__)
 
 
-class MultipleToNewFeature(sk.base.BaseEstimator, sk.base.TransformerMixin, UtilityMixin):
+class MultipleToNewFeature(BaseEstimator, TransformerMixin, UtilityMixin):
 
     def __init__(self, selected_cols, new_col_name, func):
         """Given a list of column names, create one new column in the df. New column defined by func.
