@@ -71,7 +71,7 @@ print('matplotlib {} as mpl'.format(mpl.__version__))
 import matplotlib.pyplot as plt
 print('matplotlib.pyplot as plt'.format())
 import seaborn as sns
-print('seaboarn {} as sns'.format(sns.__version__))
+print('seaborn {} as sns'.format(sns.__version__))
 
 # from IPython.core.display import display, HTML
 #

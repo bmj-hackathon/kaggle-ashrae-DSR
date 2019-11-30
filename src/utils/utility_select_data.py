@@ -4,7 +4,9 @@
 # Modified to add option to use float16 or not. feather format does not support float16.
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_categorical_dtype
+import logging
 
+#%%
 def select_buildings_on_site(bldg_meter_recs, bldg_meta, site_number):
     """Given a site ID, select all building meter records matching.
 
