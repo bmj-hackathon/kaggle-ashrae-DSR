@@ -1,26 +1,27 @@
 #%% Train data
 logging.info(" *** Step 2: Load data *** ".format())
 
-# Train
+# Train #############
 train_df = pd.read_feather(SETTINGS.data.path_data_root / 'train.feather')
 logging.info("Loaded: train_df {} with {} buildings, {:0.1f} MB".format(train_df.shape, train_df.loc[:, 'building_id'].nunique(), train_df.memory_usage().sum() / 1024 ** 2))
 if SETTINGS.data.drop:
     drop_after = int((1-SETTINGS.data.drop) * len(train_df))
     train_df = train_df.iloc[0:drop_after]
     logging.info("Dropped data, train_df reduced to {}".format(train_df.shape))
-# Test
+
+# Test #############
 test_df = pd.read_feather(SETTINGS.data.path_data_root / 'test.feather')
 logging.info("Loaded: test_df {} with {} buildings, {:0.1f} MB".format(test_df.shape, test_df.loc[:, 'building_id'].nunique(), test_df.memory_usage().sum() / 1024 ** 2))
 
-# Weather train
+# Weather train #############
 weather_train_df = pd.read_feather(SETTINGS.data.path_data_root/'weather_train.feather')
 logging.info("Loaded: weather_train_df {}".format(weather_train_df.shape))
 
-# Weather test
+# Weather test #############
 weather_test_df = pd.read_feather(SETTINGS.data.path_data_root/'weather_test.feather')
 logging.info("Loaded: weather_test_df {}".format(weather_test_df.shape))
 
-# Meta
+# Meta #############
 building_meta_df = pd.read_feather(SETTINGS.data.path_data_root/'building_metadata.feather')
 logging.info("Loaded: building_meta_df {}".format(building_meta_df.shape))
 building_meta_df.set_index('building_id', inplace=True, drop=True)
@@ -29,6 +30,8 @@ building_meta_df.set_index('building_id', inplace=True, drop=True)
 # sample_submission = pd.read_feather(os.path.join(SETTINGS.data.path_data_root, 'sample_submission.feather'))
 # logging.info("Loaded: sample_submission {}".format(sample_submission.shape))
 # sample_submission = reduce_mem_usage(sample_submission)
+#%%
+util_data.select_buildings_on_site(train_df, building_meta_df, SETTINGS.data.site)
 
 #%%
 # train_merge = train_df_data.merge(building_meta_df, on='building_id', how='left')

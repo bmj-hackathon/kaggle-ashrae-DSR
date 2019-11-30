@@ -5,7 +5,20 @@
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_categorical_dtype
 
+def select_buildings_on_site(bldg_meter_recs, bldg_meta, site_number):
+    """Given a site ID, select all building meter records matching.
 
+    :param bldg_meter_recs:
+    :param bldg_meta:
+    :param site_number:
+    :return:
+    """
+    select_bldg_ids = bldg_meta[bldg_meta['site_id'] == site_number]
+    select_bldg_ids = select_bldg_ids.index
+    sel = bldg_meter_recs[bldg_meter_recs['building_id'].isin(select_bldg_ids)]
+    logging.info("Selected all {} buildings in site {}, {:0.1%} of data".format(
+        len(select_bldg_ids), site_number, len(sel) / len(bldg_meter_recs) ))
+    return sel
 
 def get_building(df_meter_records, bldg_id):
     """
