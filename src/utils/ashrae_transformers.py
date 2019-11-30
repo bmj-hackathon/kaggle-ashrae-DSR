@@ -141,4 +141,25 @@ class TemporalTransformer(BaseEstimator, TransformerMixin, TransformerLog):
         out['weekday'] = X[self._column].dt.weekday
         out['quarter'] = X[self._column].dt.quarter
         out['weekend'] = np.where(X[self._column].dt.weekday > 4, 1, 0)
+        out['early_morning'] = np.where(np.logical_and(out['hour'] > 6,
+                                                       out['hour'] < 8),
+                                        1, 0)
+        out['morning'] = np.where(np.logical_and(out['hour'] > 8,
+                                                 out['hour'] < 12),
+                                  1, 0)
+        out['afternoon'] = np.where(np.logical_and(out['hour'] > 12,
+                                                   out['hour'] < 16),
+                                    1, 0)
+        out['evening'] = np.where(np.logical_and(out['hour'] > 16,
+                                                 out['hour'] < 20),
+                                  1, 0)
+        out['night'] = np.where(np.logical_and(out['hour'] > 20,
+                                               out['hour'] < 6),
+                                1, 0)
+        out['monday_morning'] = np.where(np.logical_and(out['hour'] < 7,
+                                                        out['weekday'] == 0),
+                                         1, 0)
+        out['friday_evening'] = np.where(np.logical_and(out['hour'] > 16,
+                                                        out['weekday'] == 4),
+                                         1, 0)
         return out
