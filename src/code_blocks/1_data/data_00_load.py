@@ -27,9 +27,9 @@ logging.info("Loaded: building_meta_df {}".format(building_meta_df.shape))
 building_meta_df.set_index('building_id', inplace=True, drop=True)
 
 # Sample
-# sample_submission = pd.read_feather(os.path.join(SETTINGS.data.path_data_root, 'sample_submission.feather'))
-# logging.info("Loaded: sample_submission {}".format(sample_submission.shape))
-# sample_submission = reduce_mem_usage(sample_submission)
+sample_submission = pd.read_feather(os.path.join(SETTINGS.data.path_data_feather, 'sample_submission.feather'))
+logging.info("Loaded: sample_submission {}".format(sample_submission.shape))
+sample_submission = reduce_mem_usage(sample_submission)
 #%%
 if SETTINGS.data.site != None:
     train_df = util_data.select_buildings_on_site(train_df, building_meta_df, SETTINGS.data.site)

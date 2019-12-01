@@ -2,8 +2,7 @@
 # Original code from https://www.kaggle.com/gemartin/load-data-reduce-memory-usage by @gemartin
 # Modified to support timestamp type, categorical type
 # Modified to add option to use float16 or not. feather format does not support float16.
-from pandas.api.types import is_datetime64_any_dtype as is_datetime
-from pandas.api.types import is_categorical_dtype
+
 import logging
 
 #%%

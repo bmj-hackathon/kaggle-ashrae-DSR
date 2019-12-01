@@ -29,6 +29,17 @@ leaked_days = (train_df_leak0['timestamp'].max()-train_df_leak0['timestamp'].min
 logging.info("Site 0 leakage {:0.1f} years, from {:%Y-%b-%d} to {:%Y-%b-%d}".format(leaked_days, train_df_leak0['timestamp'].min(), train_df_leak0['timestamp'].max()))
 
 #%%
-for bldg_id in train_df_leak0['building_id'].unique():
+train_df_leak0_actual = train_df_leak0.drop('meter_reading_original', axis=1)
+train_df_leak0_actual.rename({'meter_reading_scraped':'meter_reading'}, axis=1, inplace=True)
+
+for bldg_id in train_df_leak0_actual['building_id'].unique():
     print(bldg_id)
-    this_bldg_df = util_data.get_building
+    this_bldg_df = util_data.get_building(train_df_leak0_actual, bldg_id)
+
+#%%
+
+
+sample_submission
+
+train_df_leak0
+
