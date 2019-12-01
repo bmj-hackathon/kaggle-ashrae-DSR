@@ -19,10 +19,17 @@ timestamp                datetime64[ns]
 meter_reading_scraped    float32
 ```
 
-- Site 0
-    - Complete data for all years
-- Site 1
+- Site 0, UCF campus buildings
+    - Complete data for all buildings, years
+- Site 1, UCL campus buildings
     - Missing only one building
+- Site 2, ASU campus
+    - ?? 
+- Site 4, Berkeley UCB campus
+    - Missing some buildings
+- Site 15, Cornell
+    - Does not include 2016
+
 
 ## Psychrometric features
 Both test and train weather have psychrometrics calculated. 
