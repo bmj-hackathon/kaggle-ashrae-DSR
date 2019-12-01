@@ -24,3 +24,11 @@ else: # Create the feather file
 
 #%%
 
+logging.info("Site 0 leakage with {} buildings".format(train_df_leak0['building_id'].nunique()))
+leaked_days = (train_df_leak0['timestamp'].max()-train_df_leak0['timestamp'].min()).days / 365
+logging.info("Site 0 leakage {:0.1f} years, from {:%Y-%b-%d} to {:%Y-%b-%d}".format(leaked_days, train_df_leak0['timestamp'].min(), train_df_leak0['timestamp'].max()))
+
+#%%
+for bldg_id in train_df_leak0['building_id'].unique():
+    print(bldg_id)
+    this_bldg_df = util_data.get_building
