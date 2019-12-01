@@ -1,11 +1,12 @@
 import pandas as pd
+import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
-import sklearn as sk
 import time
 import logging
 
+__all__ = ['TypeSelector', 'FeatureSelector', 'TemporalTransformer']
 
-#%%
+
 def dump_func_name(func):
     def echo_func(*func_args, **func_kwargs):
         print('')
@@ -13,7 +14,6 @@ def dump_func_name(func):
         return func(*func_args, **func_kwargs)
     return echo_func
 
-#%%
 def timeit(method):
     """Decorator to time execution of transformers
     :param method:
@@ -33,7 +33,6 @@ def timeit(method):
     return timed
 
 
-#%%
 class UtilityMixin:
     @property
     def log(self):
@@ -57,7 +56,6 @@ class UtilityMixin:
             raise ValueError("Input is not a pandas DataFrame it's a {}".format(type(df)))
 
 
-#%%
 class TransformerLog():
     """Add a .log attribute for logging
     """
@@ -65,8 +63,9 @@ class TransformerLog():
     def log(self):
         return "{} transform".format(type(self).__name__)
 
-#%%
-class MultipleToNewFeature(sk.base.BaseEstimator, sk.base.TransformerMixin, UtilityMixin):
+
+class MultipleToNewFeature(BaseEstimator, TransformerMixin, UtilityMixin):
+
     def __init__(self, selected_cols, new_col_name, func):
         """Given a list of column names, create one new column in the df. New column defined by func.
 
@@ -90,7 +89,7 @@ class MultipleToNewFeature(sk.base.BaseEstimator, sk.base.TransformerMixin, Util
         logging.info(self.log, "{}({}) -> ['{}']".format(self.func.__name__, self.columns, self.new_col_name))
         return df
 
-#%%
+
 class TypeSelector(BaseEstimator, TransformerMixin, TransformerLog):
     def __init__(self, dtype):
         self.dtype = dtype
@@ -142,4 +141,25 @@ class TemporalTransformer(BaseEstimator, TransformerMixin, TransformerLog):
         out['weekday'] = X[self._column].dt.weekday
         out['quarter'] = X[self._column].dt.quarter
         out['weekend'] = np.where(X[self._column].dt.weekday > 4, 1, 0)
+        out['early_morning'] = np.where(np.logical_and(out['hour'] > 6,
+                                                       out['hour'] < 8),
+                                        1, 0)
+        out['morning'] = np.where(np.logical_and(out['hour'] > 8,
+                                                 out['hour'] < 12),
+                                  1, 0)
+        out['afternoon'] = np.where(np.logical_and(out['hour'] > 12,
+                                                   out['hour'] < 16),
+                                    1, 0)
+        out['evening'] = np.where(np.logical_and(out['hour'] > 16,
+                                                 out['hour'] < 20),
+                                  1, 0)
+        out['night'] = np.where(np.logical_and(out['hour'] > 20,
+                                               out['hour'] < 6),
+                                1, 0)
+        out['monday_morning'] = np.where(np.logical_and(out['hour'] < 7,
+                                                        out['weekday'] == 0),
+                                         1, 0)
+        out['friday_evening'] = np.where(np.logical_and(out['hour'] > 16,
+                                                        out['weekday'] == 4),
+                                         1, 0)
         return out
