@@ -1,25 +1,29 @@
 logging.info(" *** Step 3: Feature engineering *** ".format())
 
-# df_train.info()
-# df_train
-
-
-# pipeline = sk.pipeline.Pipeline(steps=[('1', trfs.MyColumnSelector(['timestamp'])), ])
-# pipeline.fit_transform(df_train.copy())
 #%%
 feature_union = list()
 
 #%% Time features
 feature_union.append(sk.pipeline.Pipeline(steps=[('time', trfs.TimeFeatures('timestamp')), ]))
 
-#%% Categorical features
 
+#%% Categorical features to OneHot
 categorical_features1 = ['meter', 'primary_use']
 
 feature_union.append(sk.pipeline.Pipeline(steps=[
-    ('cat_selector1', trfs.MyColumnSelector(categorical_features1)),
-    ('onehot_encoder', sklearn.preprocessing.OneHotEncoder(handle_unknown='ignore'))
+    ('onehot_encoder', trfs.MyOneHotDF(categorical_features1))
 ]))
+
+#%%
+for i, pipe in enumerate(feature_union):
+    print(i)
+    print("\t",pipe.named_steps)
+
+
+#%%
+
+
+#%%
 
 this_pipe = sk.pipeline.Pipeline(steps=[
     ('cat_selector1', trfs.MyColumnSelector(categorical_features1)),

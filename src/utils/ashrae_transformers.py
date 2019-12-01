@@ -4,9 +4,9 @@ from sklearn.base import BaseEstimator, TransformerMixin
 import time
 import logging
 from deprecated import deprecated
+import pandas.api.types as ptypes
 
 __all__ = ['TypeSelector', 'FeatureSelector', 'TemporalTransformer']
-
 
 def dump_func_name(func):
     def echo_func(*func_args, **func_kwargs):
@@ -254,4 +254,34 @@ class DFMapperTimeFeatures(BaseEstimator, TransformerMixin, TransformerLog, Util
         df_return['weekday'] = X.dt.weekday
         df_return['quarter'] = X.dt.quarter
         df_return['weekend'] = np.where(X.dt.weekday > 4, 1, 0)
+        return df_return
+
+#%%
+class MyOneHotDF(BaseEstimator, TransformerMixin, TransformerLog, UtilityMixin):
+    def __init__(self, columns):
+        self.columns = columns
+
+    def fit(self, X, y=None):
+        return self
+
+    @timeit
+    def transform(self, df, y=None):
+        self._assert_df(df)
+        self._check_columns_exist(df)
+
+        df_subset = df[self.columns].copy()
+
+        # Need to iterate over columns to process non-object/categorical dtypes
+        df_return = pd.DataFrame()
+        for col in df_subset.columns:
+            # Force encode numeric and other types
+            if not ptypes.is_string_dtype(df_subset[col]):
+                this_df = df_subset[[col]].astype(str)
+            else:
+                this_df = df_subset[[col]]
+
+            this_df = pd.get_dummies(this_df)
+            # this_df.drop(col, axis=1,inplace=True)
+            df_return = pd.concat([df_return, this_df], axis=1)
+
         return df_return
