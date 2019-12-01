@@ -33,7 +33,9 @@ Both test and train weather have psychrometrics calculated.
 ### Linking the DATA folder
 
 `ln -s YOUR_DATA_PATH ./data`
+
 i.e.;
+
 `ln -s ~/DATA/ashrae-energy-prediction/data ./data`
 
 ## Environment management
