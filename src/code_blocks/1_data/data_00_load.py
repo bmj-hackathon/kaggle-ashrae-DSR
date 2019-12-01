@@ -31,8 +31,9 @@ building_meta_df.set_index('building_id', inplace=True, drop=True)
 # logging.info("Loaded: sample_submission {}".format(sample_submission.shape))
 # sample_submission = reduce_mem_usage(sample_submission)
 #%%
-if SETTINGS.data.site:
-    util_data.select_buildings_on_site(train_df, building_meta_df, SETTINGS.data.site)
+if SETTINGS.data.site != None:
+    train_df = util_data.select_buildings_on_site(train_df, building_meta_df, SETTINGS.data.site)
+
 
 #%%
 # train_merge = train_df_data.merge(building_meta_df, on='building_id', how='left')

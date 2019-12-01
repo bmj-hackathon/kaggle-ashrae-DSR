@@ -88,10 +88,9 @@ assert DATA_FEATHER_PATH.exists()
 
 # zipfile.ZipFile(DATA_PATH).infolist()
 
-#%%
+#%% LOAD the data
 ZIPPED = False
 
-# %%time
 if ZIPPED:
     with zipfile.ZipFile(DATA_PATH) as zf:
         with zf.open('train.csv') as zcsv:
@@ -114,7 +113,7 @@ else:
     building_meta_df = pd.read_csv(DATA_PATH / 'building_metadata.csv')
     sample_submission = pd.read_csv(DATA_PATH / 'sample_submission.csv')
 
-
+#%%
 train_df['timestamp'] = pd.to_datetime(train_df['timestamp'])
 test_df['timestamp'] = pd.to_datetime(test_df['timestamp'])
 weather_train_df['timestamp'] = pd.to_datetime(weather_train_df['timestamp'])

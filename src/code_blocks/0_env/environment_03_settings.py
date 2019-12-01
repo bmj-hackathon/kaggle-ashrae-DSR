@@ -19,10 +19,5 @@ SETTINGS.model.num_rounds=1000
 SETTINGS.control = Map()
 SETTINGS.control.debug = False
 
-#
-SETTINGS.data.path_data_root = Path.cwd() / 'data' / 'feather'
-SETTINGS.data.use_ucf = True
-SETTINGS.data.path_output = Path.cwd() / 'output'
-
 logging.info("Settings:".format())
 pprint(SETTINGS)
