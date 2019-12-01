@@ -43,7 +43,7 @@ class UtilityMixin:
         self._assert_df(df)
 
         # Must have columns specified
-        assert self.columns
+        assert self.columns, "No columns specified!"
 
         # Ensure columns in a list()
         if isinstance(self.columns, str):
@@ -131,25 +131,24 @@ class FeatureSelector(BaseEstimator, TransformerMixin, TransformerLog):
             raise KeyError("The DataFrame does not include the columns: %s" % cols_error)
 
 
-class MyColumnSelector(BaseEstimator, TransformerMixin, TransformerLog):
-    def __init__(self, feature_names):
-        self._feature_names = feature_names
+
+class MyColumnSelector(BaseEstimator, TransformerMixin, TransformerLog, UtilityMixin):
+    def __init__(self, columns):
+        self.columns = columns
 
     def fit(self, X, y=None):
         return self
 
     @timeit
-    def transform(self, X, y=None):
-        logging.info("{} - {}".format(self.log, self._feature_names))
-        assert isinstance(X, pd.DataFrame)
+    def transform(self, df, y=None):
+        logging.info("{} - {}".format(self.log, self.columns))
 
-        try:
-            return X[self._feature_names]
-        except KeyError:
-            cols_error = list(set(self._feature_names) - set(X.columns))
-            raise KeyError("The DataFrame does not include the columns: %s" % cols_error)
+        self._assert_df(df)
+        self._check_columns_exist(df)
 
+        return df[self.columns]
 
+@deprecated(reason="Deprecated to TimeFeatures")
 class TemporalTransformer(BaseEstimator, TransformerMixin, TransformerLog):
     def __init__(self, column):
         self._column = column
@@ -191,3 +190,68 @@ class TemporalTransformer(BaseEstimator, TransformerMixin, TransformerLog):
                                                         out['weekday'] == 4),
                                          1, 0)
         return out
+
+class TimeFeatures(BaseEstimator, TransformerMixin, TransformerLog, UtilityMixin):
+    def __init__(self, column_name):
+        assert type(column_name) == str
+        # Only one column
+        self.columns = [column_name]
+
+    def fit(self, X, y=None):
+        return self
+
+    @timeit
+    def transform(self, df, y=None):
+        self._assert_df(df)
+        self._check_columns_exist(df)
+
+        # Only one column for this transformer
+        this_col = self.columns[0]
+        assert pd.api.types.is_datetime64_any_dtype(df[this_col])
+
+        df_return = pd.DataFrame()
+
+        df_return['hour'] = df[this_col].dt.hour
+        df_return['month'] = df[this_col].dt.month
+        df_return['week'] = df[this_col].dt.week
+        df_return['weekday'] = df[this_col].dt.weekday
+        df_return['quarter'] = df[this_col].dt.quarter
+        df_return['weekend'] = np.where(df[this_col].dt.weekday > 4, 1, 0)
+        # df_return['early_morning'] = np.where(np.logical_and(df_return['hour'] > 6, df_return['hour'] < 8), 1, 0)
+        # df_return['morning'] = np.where(np.logical_and(df_return['hour'] > 8, df_return['hour'] < 12), 1, 0)
+        # df_return['afternoon'] = np.where(np.logical_and(df_return['hour'] > 12, df_return['hour'] < 16), 1, 0)
+        # df_return['evening'] = np.where(np.logical_and(df_return['hour'] > 16, df_return['hour'] < 20), 1, 0)
+        # df_return['night'] = np.where(np.logical_and(df_return['hour'] > 20, df_return['hour'] < 6), 1, 0)
+        # df_return['monday_morning'] = np.where(np.logical_and(df_return['hour'] < 7, df_return['weekday'] == 0), 1, 0)
+        # df_return['friday_evening'] = np.where(np.logical_and(df_return['hour'] > 16, df_return['weekday'] == 4), 1, 0)
+        return df_return
+
+@deprecated(reason="Don't use DataFrame Mapper class...")
+class DFMapperTimeFeatures(BaseEstimator, TransformerMixin, TransformerLog, UtilityMixin):
+    def __init__(self):
+        pass
+        # assert type(column_name) == str
+        # Only one column
+        # self.columns = [column_name]
+
+    def fit(self, X, y=None):
+        return self
+
+    @timeit
+    def transform(self, X, y=None):
+        # self._assert_df(df)
+        # self._check_columns_exist(df)
+
+        # Only one column for this transformer
+        # this_col = self.columns[0]
+        # assert pd.api.types.is_datetime64_any_dtype(df[this_col])
+        print(X.shape)
+        df_return = pd.DataFrame()
+
+        df_return['hour'] = X.dt.hour
+        df_return['month'] = X.dt.month
+        df_return['week'] = X.dt.week
+        df_return['weekday'] = X.dt.weekday
+        df_return['quarter'] = X.dt.quarter
+        df_return['weekend'] = np.where(X.dt.weekday > 4, 1, 0)
+        return df_return
