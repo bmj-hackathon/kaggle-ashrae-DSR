@@ -27,6 +27,7 @@ dash-daq = "*"
 psypy = "*"
 psychrolib = "*"
 category-encoders = "*"
+deprecated = "*"
 
 [requires]
 python_version = "3.6"

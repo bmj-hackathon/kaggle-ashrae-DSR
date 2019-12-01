@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 import time
 import logging
+from deprecated import deprecated
 
 __all__ = ['TypeSelector', 'FeatureSelector', 'TemporalTransformer']
 
@@ -40,11 +41,18 @@ class UtilityMixin:
 
     def _check_columns_exist(self, df):
         self._assert_df(df)
+
+        # Must have columns specified
+        assert self.columns
+
         # Ensure columns in a list()
         if isinstance(self.columns, str):
-            self.columns = list(self.columns)
+            raise ValueError("Columns must be specified as a list, you specified a string: {}".format(self.columns))
+            # self.columns = list(self.columns)
 
         self._assert_df(df)
+
+        # Now check each column against the dataframe
         missing_columns = set(self.columns) - set(df.columns)
         if len(missing_columns) > 0:
             missing_columns_ = ','.join(col for col in missing_columns)
@@ -102,8 +110,28 @@ class TypeSelector(BaseEstimator, TransformerMixin, TransformerLog):
         assert isinstance(X, pd.DataFrame)
         return X.select_dtypes(include=[self.dtype])
 
-
+@deprecated(reason="Deprecated to MyColumnSelector")
 class FeatureSelector(BaseEstimator, TransformerMixin, TransformerLog):
+    def __init__(self, feature_names):
+        self._feature_names = feature_names
+
+
+    def fit(self, X, y=None):
+        return self
+
+    @timeit
+    def transform(self, X, y=None):
+        logging.info("{} - {}".format(self.log, self._feature_names))
+        assert isinstance(X, pd.DataFrame)
+
+        try:
+            return X[self._feature_names]
+        except KeyError:
+            cols_error = list(set(self._feature_names) - set(X.columns))
+            raise KeyError("The DataFrame does not include the columns: %s" % cols_error)
+
+
+class MyColumnSelector(BaseEstimator, TransformerMixin, TransformerLog):
     def __init__(self, feature_names):
         self._feature_names = feature_names
 
