@@ -26,3 +26,15 @@ building_meta_df.set_index('building_id', inplace=True, drop=True)
 df_submission = pd.read_feather(os.path.join(SETTINGS.data.path_data_feather, 'sample_submission.feather'))
 logging.info("Loaded: sample_submission {}".format(df_submission.shape))
 sample_submission = reduce_mem_usage(df_submission)
+
+if SETTINGS.features.psychrometric:
+    logging.info("Feature: Psychrometric".format())
+    # Weather test Psychro #############
+    weather_test_psychro_df = pd.read_feather(SETTINGS.data.path_data_root / 'feature_psychrometric' / 'weather_test_psychrometric.feather')
+    logging.info("Loaded: weather_test_psychro_df {}".format(weather_test_psychro_df.shape))
+
+    weather_train_psychro_df = pd.read_feather(SETTINGS.data.path_data_root / 'feature_psychrometric' / 'weather_train_psychrometric.feather')
+    logging.info("Loaded: weather_train_psychro_df {}".format(weather_train_psychro_df.shape))
+    # weather_test_psychro_df.index
+    # weather_test_df.index
+    # weather_test_df.merge(weather_test_psychro_df, )
