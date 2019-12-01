@@ -23,10 +23,19 @@ logging.info("Merged weather to test_merge {:0.1f} MB".format(get_mem(df_test_me
 r = df_train_merged.head()
 r = df_test_merged.head()
 
+df_train = df_train_merged
+df_test = df_test_merged
+
+# Cleanup memory
 remove_vars = list()
 remove_vars += ['train_df', 'weather_train_df', 'test_df', 'weather_test_df']
 remove_vars += ['weather_test_psychro_df', 'weather_train_psychro_df']
+remove_vars += ['df_train_merged', 'df_test_merged']
 for var in remove_vars:
     logging.info("Removing {}, {:0.1f} MB".format(var, sys.getsizeof(globals()[var]) / 1012 ** 2 ))
     if var in globals():
         del globals()[var]
+
+
+logging.info("df_train: {}".format(df_train.shape))
+logging.info("df_test: {}".format(df_test.shape))
