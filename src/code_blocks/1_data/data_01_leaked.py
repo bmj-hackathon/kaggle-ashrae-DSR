@@ -1,5 +1,4 @@
-#%% Load SITE 0
-
+#%%
 
 def load_leaked_data(LEAK_SITE):
     path_leak = SETTINGS.data.path_data_root / 'leakage' / 'site {}'.format(LEAK_SITE)

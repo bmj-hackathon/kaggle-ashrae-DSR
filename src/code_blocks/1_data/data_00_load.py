@@ -4,7 +4,7 @@ logging.info(" *** Step 2: Load data *** ".format())
 # Train #############
 train_df = pd.read_feather(SETTINGS.data.path_data_feather / 'train.feather')
 logging.info("Loaded: train_df {} with {} buildings, {:0.1f} MB".format(train_df.shape, train_df.loc[:, 'building_id'].nunique(), train_df.memory_usage().sum() / 1024 ** 2))
-if SETTINGS.data.drop:
+if SETTINGS.sample.drop:
     drop_after = int((1-SETTINGS.data.drop) * len(train_df))
     train_df = train_df.iloc[0:drop_after]
     logging.info("Dropped data, train_df reduced to {}".format(train_df.shape))
@@ -30,9 +30,11 @@ building_meta_df.set_index('building_id', inplace=True, drop=True)
 sample_submission = pd.read_feather(os.path.join(SETTINGS.data.path_data_feather, 'sample_submission.feather'))
 logging.info("Loaded: sample_submission {}".format(sample_submission.shape))
 sample_submission = reduce_mem_usage(sample_submission)
+
 #%%
-if SETTINGS.data.site != None:
-    train_df = util_data.select_buildings_on_site(train_df, building_meta_df, SETTINGS.data.site)
+if SETTINGS.sample.site != None:
+    logging.info("Down sampling to site {}".format(SETTINGS.sample.site))
+    train_df = util_data.select_buildings_on_site(train_df, building_meta_df, SETTINGS.sample.site)
 
 
 #%%
