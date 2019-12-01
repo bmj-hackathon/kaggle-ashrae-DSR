@@ -9,9 +9,26 @@ Your local data folder should have
 ```
 
 ## Data leakage
+All leaked data conforms to a common standard with reduced memory: 
+
+```
+Data columns (total 4 columns):
+building_id              int16
+meter                    int8
+timestamp                datetime64[ns]
+meter_reading_scraped    float32
+```
+
 - Site 0
     - Complete data for all years
-    
+- Site 1
+    - Missing only one building
+
+## Psychrometric features
+Both test and train weather have psychrometrics calculated. 
+
+
+
 
 ### Linking the DATA folder
 

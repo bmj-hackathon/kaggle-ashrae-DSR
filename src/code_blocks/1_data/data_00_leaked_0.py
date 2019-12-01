@@ -2,34 +2,20 @@
 path_leak = SETTINGS.data.path_data_root / 'leakage' / 'site 0'
 assert path_leak.exists()
 
-path_leak_csv = path_leak / 'site0.csv.gz'
 path_leak_feather = path_leak / 'site0.feather'
-if path_leak_feather.exists():
-    train_df_leak0 = pd.read_feather(path_leak_feather)
-    logging.info("Loaded site 0 leakage: {}".format(path_leak_feather))
-else: # Create the feather file
-    assert path_leak_csv.exists()
-    train_df_leak0 = pd.read_csv(path_leak_csv)
+assert path_leak_feather.exists()
 
-    # Reduce
-    train_df_leak0['timestamp'] = pd.to_datetime(train_df_leak0['timestamp'])
-    reduce_mem_usage(train_df_leak0)
-    # train_df.head()
-    # train_df_leak0.info()
-    # train_df.info()
-
-    # Save
-    train_df_leak0.to_feather(path_leak_feather)
-    logging.info("Saved {}".format(path_leak_feather))
+df_site0_leak = pd.read_feather(path_leak_feather)
+logging.info("Loaded site 0 leakage: {}".format(path_leak_feather))
 
 #%%
 
-logging.info("Site 0 leakage with {} buildings".format(train_df_leak0['building_id'].nunique()))
-leaked_days = (train_df_leak0['timestamp'].max()-train_df_leak0['timestamp'].min()).days / 365
-logging.info("Site 0 leakage {:0.1f} years, from {:%Y-%b-%d} to {:%Y-%b-%d}".format(leaked_days, train_df_leak0['timestamp'].min(), train_df_leak0['timestamp'].max()))
+logging.info("Site 0 leakage with {} buildings".format(df_site0_leak['building_id'].nunique()))
+leaked_days = (df_site0_leak['timestamp'].max() - df_site0_leak['timestamp'].min()).days / 365
+logging.info("Site 0 leakage {:0.1f} years, from {:%Y-%b-%d} to {:%Y-%b-%d}".format(leaked_days, df_site0_leak['timestamp'].min(), df_site0_leak['timestamp'].max()))
 
 #%%
-train_df_leak0_actual = train_df_leak0.drop('meter_reading_original', axis=1)
+train_df_leak0_actual = df_site0_leak.drop('meter_reading_original', axis=1)
 train_df_leak0_actual.rename({'meter_reading_scraped':'meter_reading'}, axis=1, inplace=True)
 
 for bldg_id in train_df_leak0_actual['building_id'].unique():
@@ -41,5 +27,5 @@ for bldg_id in train_df_leak0_actual['building_id'].unique():
 
 sample_submission
 
-train_df_leak0
+df_site0_leak
 
