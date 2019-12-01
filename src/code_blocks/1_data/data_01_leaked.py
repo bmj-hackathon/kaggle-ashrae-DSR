@@ -24,6 +24,7 @@ leak_dfs = dict()
 leak_sites = [0, 1, 2, 4, 15]
 for l_site in leak_sites:
     leak_dfs[l_site] = load_leaked_data(l_site)
+logging.info("Loaded leaked data from sites {}".format(leak_sites))
 
 #%%
 # train_df_leak0_actual.rename({'meter_reading_scraped':'meter_reading'}, axis=1, inplace=True)

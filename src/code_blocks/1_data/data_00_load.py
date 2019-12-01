@@ -4,10 +4,6 @@ logging.info(" *** Step 2: Load data *** ".format())
 # Train #############
 train_df = pd.read_feather(SETTINGS.data.path_data_feather / 'train.feather')
 logging.info("Loaded: train_df {} with {} buildings, {:0.1f} MB".format(train_df.shape, train_df.loc[:, 'building_id'].nunique(), train_df.memory_usage().sum() / 1024 ** 2))
-if SETTINGS.sample.drop:
-    drop_after = int((1-SETTINGS.data.drop) * len(train_df))
-    train_df = train_df.iloc[0:drop_after]
-    logging.info("Dropped data, train_df reduced to {}".format(train_df.shape))
 
 # Test #############
 test_df = pd.read_feather(SETTINGS.data.path_data_feather / 'test.feather')
@@ -26,31 +22,7 @@ building_meta_df = pd.read_feather(SETTINGS.data.path_data_feather/'building_met
 logging.info("Loaded: building_meta_df {}".format(building_meta_df.shape))
 building_meta_df.set_index('building_id', inplace=True, drop=True)
 
-# Sample
-sample_submission = pd.read_feather(os.path.join(SETTINGS.data.path_data_feather, 'sample_submission.feather'))
-logging.info("Loaded: sample_submission {}".format(sample_submission.shape))
-sample_submission = reduce_mem_usage(sample_submission)
-
-#%%
-if SETTINGS.sample.site != None:
-    logging.info("Down sampling to site {}".format(SETTINGS.sample.site))
-    train_df = util_data.select_buildings_on_site(train_df, building_meta_df, SETTINGS.sample.site)
-
-
-#%%
-# train_merge = train_df_data.merge(building_meta_df, on='building_id', how='left')
-# train_merge.memory_usage().sum() / 1024 ** 2
-# test_merge = test_df_data.merge(building_meta_df, on='building_id', how='left')
-# test_merge.memory_usage().sum() / 1024 ** 2
-#
-# train_df = train_merge.merge(weather_train_df, on=['site_id', 'timestamp'], how='left')
-# train_df.memory_usage().sum() / 1024 ** 2
-# r = train_df.head()
-#
-# test_df = test_merge.merge(weather_test_df, on=['site_id', 'timestamp'], how='left')
-# test_df.memory_usage().sum() / 1024 ** 2
-# r = test_df.head()
-
-# train2.info()
-
-# del
+# Sample submission
+df_submission = pd.read_feather(os.path.join(SETTINGS.data.path_data_feather, 'sample_submission.feather'))
+logging.info("Loaded: sample_submission {}".format(df_submission.shape))
+sample_submission = reduce_mem_usage(df_submission)
