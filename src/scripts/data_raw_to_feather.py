@@ -11,7 +11,8 @@ from pathlib import Path
 import zipfile
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-
+import psychrolib as psychrometric
+psychrometric.SetUnitSystem(psychrometric.SI)
 
 DATA_PATH = Path.cwd() / 'data/raw'
 assert DATA_PATH.exists(), DATA_PATH
@@ -125,6 +126,17 @@ if MERGE and not MERGE_ON_NAN_CLEANING:
     train_merged.to_feather(DATA_FEATHER_PATH /'train_merged.feather')
     test_merged.to_feather(DATA_FEATHER_PATH /'test_merged.feather')
 
+def second_try(full_df):
+    weather_cols = ['air_temperature', 'cloud_coverage', 'dew_temperature',
+                    'precip_depth_1_hr', 'sea_level_pressure', 'wind_direction', 'wind_speed']
+
+    full_df[weather_cols] = full_df.groupby(['site_id'])[weather_cols].transform(
+        lambda x: x.interpolate(method='spline',
+                                limit_direction='both',
+                                order=2))
+    return full_df
+
+
 def weather_fillna(weather_df):
     weather_cols = ['air_temperature', 'cloud_coverage', 'dew_temperature',
                     'precip_depth_1_hr', 'sea_level_pressure', 'wind_direction', 'wind_speed']
@@ -147,9 +159,41 @@ def weather_fillna(weather_df):
     return weather_df
 
 
+def get_wet_bulb(air_temp, dew_temp, pressure):
+    try:
+        return psychrometric.GetTWetBulbFromTDewPoint(air_temp, dew_temp, pressure)
+    except:
+        return np.NaN
+
+
+def get_rel_hum(air_temp, dew_temp):
+    try:
+        return psychrometric.GetRelHumFromTDewPoint(air_temp, dew_temp)
+    except:
+        return np.NaN
+
+
+def add_psychrometric_weather(df):
+    # Get the other psychrometric properties
+    df['sea_level_pressure_pa'] = df['sea_level_pressure'] * 100
+    df['wet_bulb_temp'] = df.apply(
+        lambda x: get_wet_bulb(x['air_temperature'], x['dew_temperature'], x['sea_level_pressure_pa']), axis=1)
+    df['rel_hum'] = df.apply(lambda x: get_rel_hum(x['air_temperature'], x['dew_temperature']), axis=1)
+    df['hum_ratio'] = df.apply(
+        lambda x: psychrometric.GetHumRatioFromRelHum(x['air_temperature'], x['rel_hum'], x['sea_level_pressure_pa']),
+        axis=1)
+    df['sensible_heat'] = df.apply(lambda x: psychrometric.GetDryAirEnthalpy(x['air_temperature']), axis=1)
+    df['latent_heat'] = df.apply(
+        lambda x: psychrometric.GetSatAirEnthalpy(x['air_temperature'], x['sea_level_pressure_pa']), axis=1)
+    return df
+
+
 if MERGE_ON_NAN_CLEANING:
     weather_train_df = weather_fillna(weather_train_df)
     weather_test_df = weather_fillna(weather_test_df)
+
+    weather_train_df = add_psychrometric_weather(weather_train_df)
+    weather_test_df = add_psychrometric_weather(weather_test_df)
 
     train_merged = train_df.merge(building_meta_df, how='left', on='building_id')
     test_merged = test_df.merge(building_meta_df, how='left', on='building_id')
@@ -157,6 +201,10 @@ if MERGE_ON_NAN_CLEANING:
     train_merged = train_merged.merge(weather_train_df, how='left', on=['site_id', 'timestamp'])
     test_merged = test_merged.merge(weather_test_df, how='left', on=['site_id', 'timestamp'])
 
+    train_merged = second_try(train_merged)
+    test_merged = second_try(test_merged)
+
     train_merged.to_feather(DATA_FEATHER_PATH / 'train_merged.feather')
     test_merged.to_feather(DATA_FEATHER_PATH / 'test_merged.feather')
+
 
