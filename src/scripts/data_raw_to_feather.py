@@ -9,20 +9,20 @@ import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pathlib import Path
 import zipfile
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
 
-DATA_PATH = 'data/raw'
-DATA_PATH = Path(DATA_PATH)
-DATA_PATH = DATA_PATH.expanduser()
+
+DATA_PATH = Path.cwd() / 'data/raw'
 assert DATA_PATH.exists(), DATA_PATH
 
-DATA_FEATHER_PATH ='data/feather'
-DATA_FEATHER_PATH = Path(DATA_FEATHER_PATH)
-DATA_FEATHER_PATH = DATA_FEATHER_PATH.expanduser()
+DATA_FEATHER_PATH = Path.cwd() / 'data/feather'
 DATA_FEATHER_PATH.mkdir(parents=True, exist_ok=True)
 
 
 ZIPPED = False
 MERGE = True
+MERGE_ON_NAN_CLEANING = True
 
 def reduce_mem_usage(df, use_float16=False):
     """ iterate through all the columns of a dataframe and modify the data type
@@ -70,26 +70,6 @@ def import_data(file):
     df = pd.read_csv(file, parse_dates=True, keep_date_col=True)
     df = reduce_mem_usage(df)
     return df
-#%%
-
-# %%
-from pathlib import Path
-import zipfile
-DATA_PATH = '~/ashrae/data/raw'
-DATA_PATH = Path(DATA_PATH)
-DATA_PATH = DATA_PATH.expanduser()
-assert DATA_PATH.exists(), DATA_PATH
-
-DATA_FEATHER_PATH ='~/ashrae/data/feather'
-DATA_FEATHER_PATH = Path(DATA_FEATHER_PATH)
-DATA_FEATHER_PATH = DATA_FEATHER_PATH.expanduser()
-DATA_FEATHER_PATH.mkdir(exist_ok=True)
-assert DATA_FEATHER_PATH.exists()
-
-# zipfile.ZipFile(DATA_PATH).infolist()
-
-#%% LOAD the data
-ZIPPED = False
 
 if ZIPPED:
     with zipfile.ZipFile(DATA_PATH) as zf:
@@ -106,12 +86,12 @@ if ZIPPED:
         with zf.open('sample_submission.csv') as zcsv:
             sample_submission = pd.read_csv(zcsv)
 else:
-    train_df = pd.read_csv(DATA_PATH / 'train.csv')
-    test_df = pd.read_csv(DATA_PATH / 'test.csv')
-    weather_train_df = pd.read_csv(DATA_PATH / 'weather_train.csv')
-    weather_test_df = pd.read_csv(DATA_PATH / 'weather_test.csv')
-    building_meta_df = pd.read_csv(DATA_PATH / 'building_metadata.csv')
-    sample_submission = pd.read_csv(DATA_PATH / 'sample_submission.csv')
+    train_df = pd.read_csv(DATA_PATH / 'train.csv.zip')
+    test_df = pd.read_csv(DATA_PATH / 'test.csv.zip')
+    weather_train_df = pd.read_csv(DATA_PATH / 'weather_train.csv.zip')
+    weather_test_df = pd.read_csv(DATA_PATH / 'weather_test.csv.zip')
+    building_meta_df = pd.read_csv(DATA_PATH / 'building_metadata.csv.zip')
+    sample_submission = pd.read_csv(DATA_PATH / 'sample_submission.csv.zip')
 
 #%%
 train_df['timestamp'] = pd.to_datetime(train_df['timestamp'])
@@ -135,7 +115,7 @@ weather_test_df.to_feather(DATA_FEATHER_PATH /'weather_test.feather')
 building_meta_df.to_feather(DATA_FEATHER_PATH /'building_metadata.feather')
 sample_submission.to_feather(DATA_FEATHER_PATH /'sample_submission.feather')
 
-if MERGE:
+if MERGE and not MERGE_ON_NAN_CLEANING:
     train_merged = train_df.merge(building_meta_df, how='left', on='building_id')
     test_merged = test_df.merge(building_meta_df, how='left', on='building_id')
 
@@ -144,3 +124,39 @@ if MERGE:
 
     train_merged.to_feather(DATA_FEATHER_PATH /'train_merged.feather')
     test_merged.to_feather(DATA_FEATHER_PATH /'test_merged.feather')
+
+def weather_fillna(weather_df):
+    weather_cols = ['air_temperature', 'cloud_coverage', 'dew_temperature',
+                    'precip_depth_1_hr', 'sea_level_pressure', 'wind_direction', 'wind_speed']
+
+    weather_df[weather_cols] = weather_df.groupby(['site_id'])[weather_cols].transform(
+        lambda x: x.interpolate(method='spline',
+                                limit_direction='both',
+                                order=2))
+
+    iter_impute = IterativeImputer(max_iter=100, random_state=42)
+
+    weather_df1 = weather_df.drop('timestamp', axis=1)
+    weather_df_imputed = iter_impute.fit_transform(weather_df1)
+
+    weather_df_imputed = pd.DataFrame(weather_df_imputed, columns=weather_df1.columns)
+
+    weather_df.loc[:, weather_df1.columns] = weather_df_imputed.loc[:, weather_df1.columns].values
+
+    del weather_df1, weather_df_imputed
+    return weather_df
+
+
+if MERGE_ON_NAN_CLEANING:
+    weather_train_df = weather_fillna(weather_train_df)
+    weather_test_df = weather_fillna(weather_test_df)
+
+    train_merged = train_df.merge(building_meta_df, how='left', on='building_id')
+    test_merged = test_df.merge(building_meta_df, how='left', on='building_id')
+
+    train_merged = train_merged.merge(weather_train_df, how='left', on=['site_id', 'timestamp'])
+    test_merged = test_merged.merge(weather_test_df, how='left', on=['site_id', 'timestamp'])
+
+    train_merged.to_feather(DATA_FEATHER_PATH / 'train_merged.feather')
+    test_merged.to_feather(DATA_FEATHER_PATH / 'test_merged.feather')
+
