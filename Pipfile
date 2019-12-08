@@ -28,6 +28,8 @@ psypy = "*"
 psychrolib = "*"
 category-encoders = "*"
 deprecated = "*"
+pdpipe = "*"
+cufflinks = "*"
 
 [requires]
 python_version = "3.6"
